@@ -1,0 +1,187 @@
+﻿<Window x:Class="RectangleApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RectangleApp" xmlns:sd="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        mc:Ignorable="d"
+        Title="Rectangle" Height="500" Width="700">
+    <!--Main UI
+    Datacontext : MainwindowViewModel-->
+    <Window.Resources>
+        <!--Sorting rectangles w.r.t diagonal size-->
+        <CollectionViewSource x:Key="RectangleCollection" Source="{Binding Rectangles}">
+            <CollectionViewSource.SortDescriptions>
+                <sd:SortDescription PropertyName="DiagonalLength" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <Style TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                        Path=(Validation.Errors)/ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <!--Main grid-->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <!--Grid panel for left side input fields and percentage square output-->
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5" x:Name="Margin1"/>
+                <RowDefinition Height="Auto" x:Name="NumberRectangleLabelRow"/>
+                <RowDefinition Height="5" x:Name="Margin2"/>
+                <RowDefinition Height="Auto" x:Name="NumberRectangleTextRow"/>
+                <RowDefinition Height="5" x:Name="Margin3"/>
+                <RowDefinition Height="Auto" x:Name="LengthWidthIpRow"/>
+                <RowDefinition Height="5" x:Name="Margin4"/>
+                <RowDefinition Height="Auto" x:Name="LengthWidtBtnRow"/>
+                <RowDefinition Height="5" x:Name="Margin5"/>
+                <RowDefinition Height="*" x:Name="LengthWidthListRow"/>
+                <RowDefinition Height="5" x:Name="Margin6"/>
+                <RowDefinition Height="Auto" x:Name="SubmitBtnRow"/>
+                <RowDefinition Height="5" x:Name="Margin7"/>
+                <RowDefinition Height="Auto" x:Name="AvgSquareRow"/>
+                <RowDefinition Height="30" x:Name="Margin8"/>
+            </Grid.RowDefinitions>
+            <!--Number of rectangles text-->
+            <TextBlock Text="Number of rectangles:" Grid.Row="1"/>
+            <!--Number of rectangles input field-->
+            <TextBox Grid.Row="3">
+                <TextBox.Text>
+                    <Binding Path="NumberOfRectangles">
+                        <Binding.ValidationRules>
+                            <local:MaxRectanglesValidation/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <!--Panel for length/width input for each rectangles-->
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!--Length label-->
+                <TextBlock Text="Length:" Grid.Column="0"/>
+                <!--Length input field-->
+                <TextBox Grid.Column="2">
+                    <TextBox.Text>
+                        <Binding Path="LengthInput">
+                            <Binding.ValidationRules>
+                                <local:MaxSizeValidation/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <!--Width text-->
+                <TextBlock Text="Width:" Grid.Column="4"/>
+                <!--Width input text-->
+                <TextBox Grid.Column="6">
+                    <TextBox.Text>
+                        <Binding Path="WidthInput">
+                            <Binding.ValidationRules>
+                                <local:MaxSizeValidation/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+            </Grid>
+            <!--Panel for add/remove/clear action buttons-->
+            <Grid Grid.Row="7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!--add button-->
+                <Button Content="Add" Command="{Binding AddCmd}" Grid.Column="0"/>
+                <!--Remove button-->
+                <Button Content="Remove" Command="{Binding RemoveCmd}" Grid.Column="2"/>
+                <!--Clear button-->
+                <Button Content="Clear" Command="{Binding ClearCmd}" Grid.Column="4"/>
+            </Grid>
+            <!--User selected rectangles size list-->
+            <ListBox Grid.Row="9" ItemsSource="{Binding RectangleSizes}"
+                     SelectedItem="{Binding SelectedRectangleSize}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:RectangleSizeModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Length: "/>
+                            <TextBlock Text="{Binding Width}"/>
+                            <TextBlock Text=" Width: "/>
+                            <TextBlock Text="{Binding Height}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <!--BUtton for generating rectangles-->
+            <Button Content="Create Rectangles" Grid.Row="11" Command="{Binding SubmitCmd}"/>
+            <!--Panel for displaying square type rectangle percentage out of total rectangles-->
+            <StackPanel Grid.Row="13" Orientation="Horizontal">
+                <TextBlock Text="Total Squres : "/>
+                <TextBlock Text="{Binding SquarePercentage, StringFormat=N2}"/>
+                <TextBlock Text=" %"/>
+            </StackPanel>
+        </Grid>
+
+        <!--Panel for displaying generated rectangles with details-->
+        <Grid Grid.Column="3" Grid.Row="1">
+            <ListBox ItemsSource="{Binding Source={StaticResource RectangleCollection}}" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto" VirtualizingPanel.CacheLengthUnit="Item"
+                     HorizontalContentAlignment="Stretch"
+                              VirtualizingPanel.CacheLength="100">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:RectangleModel}">
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="5" x:Name="margin"/>
+                                <ColumnDefinition Width="Auto" x:Name="DetailsArea"/>
+                                <ColumnDefinition Width="20" x:Name="margin2"/>
+                                <ColumnDefinition Width="*" x:Name="RectangleArea"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="5"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="5"/>
+                            </Grid.RowDefinitions>
+                            <!--Details of rectangle-->
+                            <local:RectangleDetails Grid.Row="1" Grid.Column="1"/>
+                            <!--Rectangle shape-->
+                            <Rectangle Grid.Row="1" Grid.Column="3"
+                                       Width="{Binding Width}" Height="{Binding Height}" Margin="5"
+                                       StrokeThickness="1" Stroke="Black"/>
+                            <Separator Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Grid>
+</Window>
